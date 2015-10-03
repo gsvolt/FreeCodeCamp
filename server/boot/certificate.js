@@ -23,7 +23,7 @@ function isCertified(frontEndIds, { completedChallenges, isFrontEndCert }) {
   if (isFrontEndCert) {
     return true;
   }
-  return _.every(frontEndIds, (id) => _.some(completedChallenges, { id }));
+  return _.every(frontEndIds, ({ id }) => _.some(completedChallenges, { id }));
 }
 
 export default function certificate(app) {
