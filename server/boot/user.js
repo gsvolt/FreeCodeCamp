@@ -89,7 +89,18 @@ module.exports = function(app) {
   );
   router.get('/vote1', vote1);
   router.get('/vote2', vote2);
-  // Ensure this is the last route!
+
+  // Ensure these are the last routes!
+  router.get(
+    '/:username/front-end-certification',
+    showFrontCert
+  );
+
+  router.get(
+    '/:username/full-stack-certification',
+    showFullCert
+  );
+
   router.get('/:username', returnUser);
 
   app.use(router);
@@ -198,9 +209,14 @@ module.exports = function(app) {
           title: 'Camper ' + profileUser.username + '\'s portfolio',
           username: profileUser.username,
           name: profileUser.name,
+
           isMigrationGrandfathered: profileUser.isMigrationGrandfathered,
           isGithubCool: profileUser.isGithubCool,
           isLocked: !!profileUser.isLocked,
+
+          isFrontEndCert: profileUser.isFrontEndCert,
+          isFullStackCert: profileUser.isFullStackCert,
+          isHonest: profileUser.isHonest,
 
           location: profileUser.location,
           calender: data,
@@ -224,6 +240,42 @@ module.exports = function(app) {
         });
       }
     );
+  }
+
+  function showFrontCert(req, res) {
+    const { user } = req;
+    if (user.isFrontEndCert) {
+      return res.render(
+        'certificate/front-end.jade',
+        {
+          username: user.username,
+          date: moment().format('MMMM, Do YYYY'),
+          name: user.name
+        }
+      );
+    }
+    req.flash('errors', {
+      msg: `Looks like you are not front end certified`
+    });
+    res.redirect('/map');
+  }
+
+  function showFullCert(req, res) {
+    const { user } = req;
+    if (user.isFullStackCert) {
+      return res.render(
+        'certificate/full-stack.jade',
+        {
+          username: user.username,
+          date: moment().format('MMMM, Do YYYY'),
+          name: user.name
+        }
+      );
+    }
+    req.flash('errors', {
+      msg: `Looks like you are not full stack certified`
+    });
+    res.redirect('/map');
   }
 
   function toggleLockdownMode(req, res, next) {
@@ -306,11 +358,6 @@ module.exports = function(app) {
       title: 'Forgot Password'
     });
   }
-
-  /**
-  * POST /forgot
-  * Create a random token, then the send user an email with a reset link.
-  */
 
   function postForgot(req, res) {
     const errors = req.validationErrors();
